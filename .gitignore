@@ -34,5 +34,10 @@ Eletrohub/
 *.jpeg
 *.bat
 
+# Exceção: assets do Expo (necessários para o build)
+!assets/*.png
+!assets/*.jpg
+!assets/*.jpeg
+
 # Backend (repositório separado)
 microservices-java/
