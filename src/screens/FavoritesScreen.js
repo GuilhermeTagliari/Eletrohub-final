@@ -8,6 +8,7 @@ import { useMyItems } from '../context/MyItemsContext';
 import { useTheme } from '../context/ThemeContext';
 import { onTabBarScroll, TAB_BAR_INSET } from '../utils/tabBarAnim';
 import ProductCard from '../components/ProductCard';
+import { getFallbackImage } from '../services/api';
 
 export default function FavoritesScreen({ navigation }) {
   const { favorites } = useFavorites();
@@ -17,7 +18,15 @@ export default function FavoritesScreen({ navigation }) {
 
   const localIds = useMemo(() => new Set(myItems.map(i => `local-${i.id}`)), [myItems]);
   const displayFavorites = useMemo(
-    () => favorites.filter(f => !f.isLocal || localIds.has(f.id)),
+    () => favorites
+      .filter(f => !f.isLocal || localIds.has(f.id))
+      .map(f => {
+        if (!f.fotos?.length && !f.foto) {
+          const url = getFallbackImage(f.description || f.nome || '', f.categoria || '');
+          if (url) return { ...f, fotos: [url] };
+        }
+        return f;
+      }),
     [favorites, localIds]
   );
 

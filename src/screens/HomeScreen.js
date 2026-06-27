@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { productAPI } from '../services/api';
+import { productAPI, getFallbackImage } from '../services/api';
 import { onTabBarScroll, TAB_BAR_INSET } from '../utils/tabBarAnim';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -34,7 +34,7 @@ function localParaProduto(item) {
     condicao: item.condicao || null,
     cidade: item.cidade || null,
     estado: item.estado || null,
-    fotos: item.fotos || [],
+    fotos: (item.fotos?.length > 0) ? item.fotos : (getFallbackImage(item.nome || '', item.categoria || '') ? [getFallbackImage(item.nome || '', item.categoria || '')] : []),
     vendido: item.vendido || false,
     emPromocao: item.emPromocao || false,
     desconto: item.desconto || 0,
@@ -144,17 +144,9 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate('ItemDetail', { product });
   }
 
-  return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-
-      {/* Header */}
-      <View style={s.header}>
-        <Text style={s.greeting}>Olá, {primeiroNome} 👋</Text>
-        <Text style={s.subGreeting}>EletroHub</Text>
-      </View>
-
-      {/* Banner */}
+  const listHeader = (
+    <>
+      {/* Banner — rola junto com a lista */}
       <View style={s.banner}>
         <View style={s.bannerContent}>
           <Text style={s.bannerTag}>DESTAQUE</Text>
@@ -167,7 +159,7 @@ export default function HomeScreen({ navigation }) {
         <View style={s.bannerDecor}>
           <View style={{ width: 88, height: 108, borderRadius: 14, overflow: 'hidden' }}>
             <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1710023038502-ba80a70a9f53?w=220&h=280&fit=crop&q=80' }}
+              source={{ uri: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=220&h=280&fit=crop&q=80' }}
               style={{ width: '100%', height: '100%' }}
               resizeMode="cover"
             />
@@ -175,12 +167,11 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Filtros de categoria */}
+      {/* Filtros de categoria — rolam junto com a lista */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={s.filtros}
-        contentInset={{ right: 20 }}
         style={s.filtrosScroll}
       >
         {categoriasDisponiveis.map((cat) => {
@@ -206,47 +197,8 @@ export default function HomeScreen({ navigation }) {
         </View>
       )}
 
-      {loading ? (
-        <View style={s.skeletonGrid}>
-          {[0,1,2,3,4,5].map(i => <SkeletonCard key={i} />)}
-        </View>
-      ) : filtrados.length === 0 ? (
-        <View style={s.center}>
-          <Ionicons
-            name={todos.length === 0 ? 'wifi-outline' : 'filter-outline'}
-            size={48}
-            color={colors.borderStrong}
-          />
-          <Text style={s.emptyTitle}>
-            {todos.length === 0 ? 'Backend offline' : 'Sem produtos'}
-          </Text>
-          <Text style={s.emptyText}>
-            {todos.length === 0
-              ? 'Inicie os serviços Java e arraste para atualizar.'
-              : `Nenhum produto na categoria "${categoriaSelecionada}".`}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filtrados}
-          keyExtractor={item => String(item.id)}
-          numColumns={2}
-          columnWrapperStyle={s.row}
-          contentContainerStyle={s.list}
-          showsVerticalScrollIndicator={false}
-          onScroll={e => onTabBarScroll(e.nativeEvent.contentOffset.y)}
-          scrollEventThrottle={16}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => { setRefreshing(true); carregarProdutos(); }}
-              tintColor={colors.text}
-            />
-          }
-          ListHeaderComponent={
-            <>
-              {/* Promoções ativas */}
-              {emPromocao.length > 0 && (
+      {/* Promoções ativas */}
+      {emPromocao.length > 0 && (
                 <View style={s.sectionBox}>
                   <View style={s.sectionHeaderRow}>
                     <Text style={s.sectionTitle}>🔥 Em promoção</Text>
@@ -329,19 +281,68 @@ export default function HomeScreen({ navigation }) {
                 </View>
               )}
 
-              {(emPromocao.length > 0 || recomendados.length > 0 || recentlyViewed.length > 0) && (
-                <Text style={s.allTitle}>Todos os produtos</Text>
-              )}
-            </>
-          }
-          renderItem={({ item }) => (
-            <ProductCard
-              product={item}
-              onPress={() => abrirProduto(item)}
-            />
-          )}
-        />
+      {(emPromocao.length > 0 || recomendados.length > 0 || recentlyViewed.length > 0) && (
+        <Text style={s.allTitle}>Todos os produtos</Text>
       )}
+    </>
+  );
+
+  return (
+    <SafeAreaView style={s.safe}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+
+      <View style={s.header}>
+        <Text style={s.greeting}>Olá, {primeiroNome} 👋</Text>
+        <Text style={s.subGreeting}>EletroHub</Text>
+      </View>
+
+      <FlatList
+        data={filtrados}
+        keyExtractor={item => String(item.id)}
+        numColumns={2}
+        columnWrapperStyle={s.row}
+        contentContainerStyle={s.list}
+        showsVerticalScrollIndicator={false}
+        onScroll={e => onTabBarScroll(e.nativeEvent.contentOffset.y)}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => { setRefreshing(true); carregarProdutos(); }}
+            tintColor={colors.text}
+          />
+        }
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={
+          loading ? (
+            <View style={s.skeletonGrid}>
+              {[0,1,2,3,4,5].map(i => <SkeletonCard key={i} />)}
+            </View>
+          ) : (
+            <View style={[s.center, { paddingVertical: 80 }]}>
+              <Ionicons
+                name={todos.length === 0 ? 'wifi-outline' : 'filter-outline'}
+                size={48}
+                color={colors.borderStrong}
+              />
+              <Text style={s.emptyTitle}>
+                {todos.length === 0 ? 'Backend offline' : 'Sem produtos'}
+              </Text>
+              <Text style={s.emptyText}>
+                {todos.length === 0
+                  ? 'Inicie os serviços Java e arraste para atualizar.'
+                  : `Nenhum produto na categoria "${categoriaSelecionada}".`}
+              </Text>
+            </View>
+          )
+        }
+        renderItem={({ item }) => (
+          <ProductCard
+            product={item}
+            onPress={() => abrirProduto(item)}
+          />
+        )}
+      />
     </SafeAreaView>
   );
 }

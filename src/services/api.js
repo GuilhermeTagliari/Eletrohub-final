@@ -64,9 +64,28 @@ const PRODUCT_FRETE_MAP = {
   'Notebook Acer Aspire 5': 0,
 };
 
+export function getFallbackImage(description = '', categoria = '') {
+  if (PRODUCT_IMAGE_MAP[description]) return PRODUCT_IMAGE_MAP[description];
+  const d = (description || '').toLowerCase();
+  const c = (categoria || '').toLowerCase();
+  if (d.includes('iphone') || d.includes('apple')) return PRODUCT_IMAGE_MAP['iPhone 15 128GB'];
+  if (d.includes('galaxy') || d.includes('s23') || d.includes('s24') || d.includes('s22')) return PRODUCT_IMAGE_MAP['Galaxy S24 256GB'];
+  if (d.includes('motorola') || d.startsWith('moto ') || d.includes(' moto ')) return PRODUCT_IMAGE_MAP['Moto G84 256GB'];
+  if (d.includes('redmi') || d.includes('xiaomi')) return PRODUCT_IMAGE_MAP['Redmi Note 13 Pro 256GB'];
+  if (d.includes('pixel') || d.includes('google pixel')) return PRODUCT_IMAGE_MAP['Pixel 8 128GB'];
+  if (d.includes('notebook') || d.includes('laptop') || d.includes('macbook') || c === 'notebook') return PRODUCT_IMAGE_MAP['Notebook Dell Inspiron 15'];
+  if (d.includes('smart tv') || d.includes('televisão') || d.includes('televisao') || c === 'televisão' || c === 'televisao' || c === 'tv') return PRODUCT_IMAGE_MAP['Smart TV Samsung 55" QLED'];
+  if (d.includes('geladeira') || d.includes('refrigerador') || c === 'geladeira') return PRODUCT_IMAGE_MAP['Geladeira Brastemp Frost Free 375L'];
+  if (d.includes('lavadora') || d.includes('máquina de lavar') || c === 'lavadora') return PRODUCT_IMAGE_MAP['Lavadora LG 12kg'];
+  if (d.includes('fogão') || d.includes('fogao') || c === 'fogão' || c === 'fogao') return PRODUCT_IMAGE_MAP['Fogão Consul 5 Bocas'];
+  if (d.includes('micro-ondas') || d.includes('microondas') || c === 'micro-ondas') return PRODUCT_IMAGE_MAP['Micro-ondas Electrolux 30L'];
+  if (c === 'smartphone' || d.includes('smartphone') || d.includes('celular')) return PRODUCT_IMAGE_MAP['Galaxy S24 256GB'];
+  return null;
+}
+
 function enrichProductImages(p) {
   if (!p.fotos?.length && !p.foto) {
-    const url = PRODUCT_IMAGE_MAP[p.description];
+    const url = getFallbackImage(p.description, p.categoria);
     if (url) p.fotos = [url];
   }
   if (p.frete === undefined || p.frete === null) {
