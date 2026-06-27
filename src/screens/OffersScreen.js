@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useMyItems } from '../context/MyItemsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { productAPI } from '../services/api';
+import { productAPI, getFallbackImage } from '../services/api';
 import { TAB_BAR_INSET } from '../utils/tabBarAnim';
 
 function isPromocaoAtiva(item) {
@@ -43,6 +43,7 @@ export default function OffersScreen({ navigation }) {
         id: `local-${item.id}`,
         description: item.nome,
         categoria: item.categoria,
+        fotos: item.fotos?.length > 0 ? item.fotos : [getFallbackImage(item.nome || '', item.categoria || '')].filter(Boolean),
         price: precoPromo,
         precoOriginal: item.desconto > 0 ? preco : null,
         desconto: item.desconto || 0,
@@ -101,7 +102,7 @@ export default function OffersScreen({ navigation }) {
             />
           ) : (
             <Ionicons
-              name={item.isLocal ? 'storefront-outline' : 'cube-outline'}
+              name="storefront-outline"
               size={32}
               color="rgba(255,255,255,0.5)"
             />

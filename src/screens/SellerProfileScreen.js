@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { useRatings } from '../context/RatingsContext';
 import { useMyItems } from '../context/MyItemsContext';
-import { productAPI } from '../services/api';
+import { productAPI, getFallbackImage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Stars from '../components/Stars';
 import { getVerifiedLabel } from '../utils/verified';
@@ -28,7 +28,7 @@ function localParaProduto(item) {
     id: `local-${item.id}`,
     description: item.nome,
     brand: item.categoria || 'Outros',
-    fotos: item.fotos || [],
+    fotos: item.fotos?.length > 0 ? item.fotos : [getFallbackImage(item.nome || '', item.categoria || '')].filter(Boolean),
     vendido: item.vendido || false,
     price: preco,
     convertedPrice: preco,
@@ -162,7 +162,7 @@ export default function SellerProfileScreen({ route, navigation }) {
                       <View style={[s.itemThumb, !foto && { backgroundColor: colors.primary }]}>
                         {foto
                           ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-                          : <Ionicons name="cube-outline" size={20} color="#fff" />}
+                          : <Ionicons name="storefront-outline" size={20} color="#fff" />}
                       </View>
                       <View style={s.itemInfo}>
                         <Text style={s.itemName} numberOfLines={1}>{item.description || item.nome}</Text>

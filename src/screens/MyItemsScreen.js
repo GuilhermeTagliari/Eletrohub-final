@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useMyItems } from '../context/MyItemsContext';
+import { getFallbackImage } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 import { enviarNotificacao, agendarNotificacaoPromocao } from '../utils/notifications';
 
@@ -83,7 +84,7 @@ export default function MyItemsScreen({ navigation }) {
   }
 
   function renderItem({ item }) {
-    const fotoCapa = item.fotos?.[0] || item.foto || null;
+    const fotoCapa = item.fotos?.[0] || item.foto || getFallbackImage(item.nome || '', item.categoria || '') || null;
     const condicaoCor = CONDICAO_COLORS[item.condicao] || '#94a3b8';
     const emPromo = isPromocaoAtiva(item);
     const dias = emPromo ? diasRestantes(item.promocaoExpira) : null;
@@ -98,7 +99,7 @@ export default function MyItemsScreen({ navigation }) {
           {fotoCapa ? (
             <Image source={{ uri: fotoCapa }} style={StyleSheet.absoluteFill} resizeMode="cover" />
           ) : (
-            <Ionicons name="cube-outline" size={32} color="rgba(255,255,255,0.6)" />
+            <Ionicons name="storefront-outline" size={32} color="rgba(255,255,255,0.6)" />
           )}
           {item.vendido && (
             <View style={styles.vendidoOverlay}>

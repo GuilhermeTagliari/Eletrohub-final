@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { getFallbackImage } from '../services/api';
 import SwipeableModal from '../components/SwipeableModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -74,6 +75,7 @@ export default function MyOrdersScreen({ navigation }) {
     const statusIdx = computeStatusIndex(item);
     const currentStatus = STATUSES[statusIdx] || STATUSES[0];
     const bgColor = BRAND_COLORS[item.brand] || (item.isLocal ? '#2c7be5' : '#555');
+    const thumbFoto = item.fotos?.[0] || getFallbackImage(item.productName || '', item.categoria || '') || null;
     const nomeExibido = item.quantity > 1
       ? `${item.productName} +${item.quantity - 1} item${item.quantity - 1 > 1 ? 's' : ''}`
       : item.productName;
@@ -85,8 +87,10 @@ export default function MyOrdersScreen({ navigation }) {
         activeOpacity={0.85}
       >
         <View style={s.cardHeader}>
-          <View style={[s.thumb, { backgroundColor: bgColor }]}>
-            <Ionicons name={item.isLocal ? 'storefront-outline' : 'cube-outline'} size={22} color="#fff" />
+          <View style={[s.thumb, { backgroundColor: thumbFoto ? '#f0f0f0' : bgColor }]}>
+            {thumbFoto
+              ? <Image source={{ uri: thumbFoto }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="contain" />
+              : <Ionicons name="storefront-outline" size={22} color="#fff" />}
           </View>
           <View style={s.cardInfo}>
             <Text style={s.productName} numberOfLines={1}>{nomeExibido}</Text>

@@ -173,6 +173,7 @@ export default function HomeScreen({ navigation }) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={s.filtros}
         style={s.filtrosScroll}
+        nestedScrollEnabled
       >
         {categoriasDisponiveis.map((cat) => {
           const ativo = categoriaSelecionada === cat;
@@ -312,7 +313,7 @@ export default function HomeScreen({ navigation }) {
             tintColor={colors.text}
           />
         }
-        ListHeaderComponent={listHeader}
+        ListHeaderComponent={() => listHeader}
         ListEmptyComponent={
           loading ? (
             <View style={s.skeletonGrid}>

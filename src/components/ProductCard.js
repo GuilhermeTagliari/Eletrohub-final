@@ -48,7 +48,7 @@ export default function ProductCard({ product, onPress }) {
         {foto ? (
           <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} resizeMode="contain" />
         ) : (
-          <Ionicons name="cube-outline" size={36} color="rgba(255,255,255,0.7)" />
+          <Ionicons name="storefront-outline" size={36} color="rgba(255,255,255,0.7)" />
         )}
         <Animated.View style={[styles.heartBtn, { transform: [{ scale: heartScale }] }]}>
           <TouchableOpacity onPress={handleHeart} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
