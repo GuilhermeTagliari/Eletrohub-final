@@ -157,13 +157,7 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
         <View style={s.bannerDecor}>
-          <View style={{ width: 88, height: 108, borderRadius: 14, overflow: 'hidden' }}>
-            <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=220&h=280&fit=crop&q=80' }}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
-            />
-          </View>
+          <Ionicons name="storefront-outline" size={88} color="rgba(255,255,255,0.15)" />
         </View>
       </View>
 
