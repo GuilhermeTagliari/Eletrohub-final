@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Animated } from 'react-native';
 import {
   NavigationContainer, DefaultTheme, DarkTheme,
@@ -325,6 +325,12 @@ export default function AppNavigator() {
   const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState('Home');
   const [showTabBar, setShowTabBar] = useState(true);
+  const [splashReady, setSplashReady] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setSplashReady(true), 1000);
+    return () => clearTimeout(t);
+  }, []);
 
   function onStateChange(state) {
     const tab = getActiveTab(state);
@@ -344,10 +350,16 @@ export default function AppNavigator() {
     },
   };
 
-  if (loading) {
+  if (loading || !splashReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
-        <ActivityIndicator size="large" color={colors.text} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F2F2F2' }}>
+        <Text style={{ fontSize: 46, color: '#111111', letterSpacing: -1, includeFontPadding: false }}>
+          <Text style={{ fontWeight: '300' }}>Eletro</Text>
+          <Text style={{ fontWeight: '900' }}>Hub</Text>
+        </Text>
+        <Text style={{ fontSize: 11, color: '#AAAAAA', fontWeight: '400', letterSpacing: 3, marginTop: 12 }}>
+          MARKETPLACE DE ELETRÔNICOS
+        </Text>
       </View>
     );
   }

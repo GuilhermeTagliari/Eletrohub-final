@@ -98,10 +98,36 @@ export default function HomeScreen({ navigation }) {
     return [...locais, ...backendProdutos];
   }, [myItems, backendProdutos]);
 
-  const emPromocao = useMemo(() =>
-    myItems.filter(i => !i.vendido).map(localParaProduto).filter(p => isPromocaoAtiva(p)),
-    [myItems]
-  );
+  const BACKEND_DESCONTOS = {
+    'iPhone 15 128GB':            12,
+    'iPhone 15 Pro 256GB':        10,
+    'Galaxy S24 256GB':           15,
+    'Galaxy S24 Ultra 512GB':      8,
+    'Galaxy A55 128GB':           20,
+    'Moto G84 256GB':             18,
+    'Redmi Note 13 Pro 256GB':    22,
+    'Notebook Dell Inspiron 15':  10,
+    'Notebook Acer Aspire 5':     12,
+    'Smart TV Samsung 55" QLED':  14,
+    'Smart TV LG 50" NanoCell':   16,
+    'Geladeira Brastemp Frost Free 375L': 8,
+    'Lavadora LG 12kg':           10,
+    'Micro-ondas Electrolux 30L': 15,
+    'Fogão Consul 5 Bocas':       12,
+  };
+
+  const emPromocao = useMemo(() => {
+    const locais = myItems.filter(i => !i.vendido).map(localParaProduto).filter(p => isPromocaoAtiva(p));
+    const remotos = backendProdutos
+      .filter(p => BACKEND_DESCONTOS[p.description])
+      .map(p => {
+        const pct = BACKEND_DESCONTOS[p.description];
+        const precoOrig = p.convertedPrice || p.price || 0;
+        const precoPromo = Math.round(precoOrig * (1 - pct / 100) * 100) / 100;
+        return { ...p, emPromocao: true, desconto: pct, precoOriginal: precoOrig, convertedPrice: precoPromo, price: precoPromo };
+      });
+    return [...locais, ...remotos];
+  }, [myItems, backendProdutos]);
 
   const filtrados = useMemo(() => {
     if (categoriaSelecionada === 'Todos') return todos;
@@ -193,7 +219,7 @@ export default function HomeScreen({ navigation }) {
       )}
 
       {/* Promoções ativas */}
-      {emPromocao.length > 0 && (
+      {categoriaSelecionada === 'Todos' && emPromocao.length > 0 && (
                 <View style={s.sectionBox}>
                   <View style={s.sectionHeaderRow}>
                     <Text style={s.sectionTitle}>🔥 Em promoção</Text>
@@ -230,7 +256,7 @@ export default function HomeScreen({ navigation }) {
               )}
 
               {/* Recomendados */}
-              {recomendados.length > 0 && (
+              {categoriaSelecionada === 'Todos' && recomendados.length > 0 && (
                 <View style={s.sectionBox}>
                   <Text style={s.sectionTitle}>Recomendados para você</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.hScroll}>
@@ -253,7 +279,7 @@ export default function HomeScreen({ navigation }) {
               )}
 
               {/* Vistos recentemente */}
-              {recentlyViewed.some(item => !item.isLocal || localIds.has(item.id)) && (
+              {categoriaSelecionada === 'Todos' && recentlyViewed.some(item => !item.isLocal || localIds.has(item.id)) && (
                 <View style={s.sectionBox}>
                   <Text style={s.sectionTitle}>Vistos recentemente</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.hScroll}>
@@ -276,7 +302,7 @@ export default function HomeScreen({ navigation }) {
                 </View>
               )}
 
-      {(emPromocao.length > 0 || recomendados.length > 0 || recentlyViewed.length > 0) && (
+      {categoriaSelecionada === 'Todos' && (emPromocao.length > 0 || recomendados.length > 0 || recentlyViewed.length > 0) && (
         <Text style={s.allTitle}>Todos os produtos</Text>
       )}
     </>
@@ -321,11 +347,11 @@ export default function HomeScreen({ navigation }) {
                 color={colors.borderStrong}
               />
               <Text style={s.emptyTitle}>
-                {todos.length === 0 ? 'Backend offline' : 'Sem produtos'}
+                {todos.length === 0 ? 'Nenhum produto disponível' : 'Sem produtos'}
               </Text>
               <Text style={s.emptyText}>
                 {todos.length === 0
-                  ? 'Inicie os serviços Java e arraste para atualizar.'
+                  ? 'Arraste para baixo para atualizar.'
                   : `Nenhum produto na categoria "${categoriaSelecionada}".`}
               </Text>
             </View>
